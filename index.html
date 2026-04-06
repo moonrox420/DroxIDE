@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>DroxIDE</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+      background: #1e222a; 
+      color: #abb2bf; 
+      overflow: hidden; 
+      height: 100vh;
+    }
+    #container { display: flex; height: 100vh; }
+
+    /* Sidebar */
+    #sidebar { 
+      width: 260px; 
+      background: #21252b; 
+      border-right: 1px solid #181a1f; 
+      display: flex; 
+      flex-direction: column;
+    }
+    .sidebar-header { 
+      height: 38px; 
+      background: #282c34; 
+      display: flex; 
+      align-items: center; 
+      padding: 0 14px; 
+      border-bottom: 1px solid #181a1f;
+      font-weight: 600;
+      font-size: 13px;
+    }
+    .btn { 
+      background: #61afef; 
+      color: white; 
+      border: none; 
+      border-radius: 6px; 
+      padding: 10px 18px; 
+      font-weight: 600; 
+      cursor: pointer; 
+      margin: 12px;
+      font-size: 13px;
+    }
+    .btn:hover { background: #4a9eda; }
+
+    /* Main area */
+    #main { flex: 1; display: flex; flex-direction: column; }
+    #toolbar { 
+      height: 46px; 
+      background: #21252b; 
+      border-bottom: 1px solid #181a1f; 
+      display: flex; 
+      align-items: center; 
+      padding: 0 16px;
+    }
+    #content { 
+      flex: 1; 
+      padding: 60px 40px; 
+      background: #1e222a; 
+      overflow: auto; 
+      line-height: 1.7;
+    }
+
+    /* Right panel */
+    #right { 
+      width: 340px; 
+      background: #21252b; 
+      border-left: 1px solid #181a1f; 
+      padding: 16px; 
+      overflow: auto;
+    }
+    .bubble { 
+      background: #2d2d2d; 
+      border: 1px solid #3c3c3c; 
+      border-radius: 12px; 
+      padding: 14px; 
+      margin: 10px 0; 
+    }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <!-- Sidebar -->
+    <div id="sidebar">
+      <div class="sidebar-header">EXPLORER</div>
+      <button class="btn" onclick="openFolder()">Open Folder</button>
+    </div>
+
+    <!-- Main Area -->
+    <div id="main">
+      <div id="toolbar">
+        <button class="btn" onclick="runSwarm()" style="margin-left:auto;">Run Swarm</button>
+      </div>
+      <div id="content">
+        <h1 style="color:#61afef;">Welcome to DroxIDE</h1>
+        <h2 style="color:#98c379; margin:12px 0;">Native Desktop AI-Powered IDE</h2>
+        <p style="margin-top:30px;">Getting Started:</p>
+        <ol style="margin:16px 0 0 24px;">
+          <li>Click "Open Folder" to load your project</li>
+          <li>Click "Run Swarm" to start AI-assisted coding</li>
+          <li>Watch agents work in the Agent Trace panel on the right</li>
+        </ol>
+      </div>
+      <div id="terminal" style="height:220px; background:#21252b; border-top:1px solid #181a1f; padding:12px; font-family:Consolas,monospace; color:#98c379;">
+        Terminal ready...
+      </div>
+    </div>
+
+    <!-- Right Panel -->
+    <div id="right">
+      <h3>Agent Trace</h3>
+      <div id="agent-trace"></div>
+
+      <h3 style="margin-top:32px;">RAG Heatmap</h3>
+      <div id="rag-heatmap" style="height:180px; background:#282c34; border-radius:8px; margin-top:12px; display:flex; align-items:center; justify-content:center; color:#5c6370;">
+        Open a folder to see RAG data
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentFolder = null;
+
+    function openFolder() {
+      currentFolder = "C:\\Users\\droxa\\MyProject";
+      document.getElementById('content').innerHTML = `<h2>Project Loaded: ${currentFolder}</h2><p>Ready for swarm.</p>`;
+      addAgentMessage("Orchestrator", "Folder opened successfully");
+    }
+
+    function runSwarm() {
+      if (!currentFolder) {
+        alert("Please open a folder first");
+        return;
+      }
+      addAgentMessage("Researcher", "Querying local RAG index...");
+      setTimeout(() => addAgentMessage("Architect", "Analyzing codebase..."), 800);
+      setTimeout(() => addAgentMessage("Coder", "Generating implementation..."), 1600);
+      setTimeout(() => addAgentMessage("Reviewer", "LSP validation passed"), 2400);
+      setTimeout(() => {
+        addAgentMessage("Orchestrator", "Swarm completed. Diff ready for review.");
+        document.getElementById('terminal').innerHTML += "<br>Swarm finished successfully.";
+      }, 3200);
+    }
+
+    function addAgentMessage(agent, message) {
+      const trace = document.getElementById('agent-trace');
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble';
+      bubble.innerHTML = `<strong>${agent}</strong><br>${message}`;
+      trace.appendChild(bubble);
+      trace.scrollTop = trace.scrollHeight;
+    }
+  </script>
+</body>
+</html>

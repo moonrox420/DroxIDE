@@ -1,0 +1,49 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+    <qresource prefix="/">
+        <!-- Application Icons -->
+        <file>resources/icons/app-icon.svg</file>
+        <file>resources/icons/app-icon-16.png</file>
+        <file>resources/icons/app-icon-32.png</file>
+        <file>resources/icons/app-icon-64.png</file>
+        <file>resources/icons/app-icon-128.png</file>
+        <file>resources/icons/app-icon-256.png</file>
+        <file>resources/icons/app-icon-512.png</file>
+        
+        <!-- Toolbar Icons -->
+        <file>resources/icons/toolbar/open-folder.svg</file>
+        <file>resources/icons/toolbar/run-swarm.svg</file>
+        <file>resources/icons/toolbar/voice-input.svg</file>
+        <file>resources/icons/toolbar/settings.svg</file>
+        <file>resources/icons/toolbar/save.svg</file>
+        <file>resources/icons/toolbar/new-file.svg</file>
+        
+        <!-- Status Icons -->
+        <file>resources/icons/status/success.svg</file>
+        <file>resources/icons/status/error.svg</file>
+        <file>resources/icons/status/warning.svg</file>
+        <file>resources/icons/status/info.svg</file>
+        
+        <!-- Agent Icons -->
+        <file>resources/icons/agents/researcher.svg</file>
+        <file>resources/icons/agents/architect.svg</file>
+        <file>resources/icons/agents/coder.svg</file>
+        <file>resources/icons/agents/reviewer.svg</file>
+        <file>resources/icons/agents/tester.svg</file>
+        <file>resources/icons/agents/janitor.svg</file>
+        
+        <!-- UI Elements -->
+        <file>resources/icons/ui/accept.svg</file>
+        <file>resources/icons/ui/reject.svg</file>
+        <file>resources/icons/ui/git-branch.svg</file>
+        <file>resources/icons/ui/terminal.svg</file>
+        <file>resources/icons/ui/file.svg</file>
+        <file>resources/icons/ui/folder.svg</file>
+    </qresource>
+    
+    <qresource prefix="/styles">
+        <!-- Application Styles -->
+        <file>resources/styles/dark-theme.qss</file>
+        <file>resources/styles/light-theme.qss</file>
+    </qresource>
+</RCC>

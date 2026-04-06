@@ -1,0 +1,40 @@
+# Rust 1.75 Sandbox for DroxIDE
+# Secure environment for running Rust tests
+FROM rust:1.75-slim
+
+# Security: Run as non-root user
+RUN groupadd -r sandbox && useradd -r -g sandbox -d /workspace -s /bin/bash sandbox
+
+# Install build dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    build-essential \
+    pkg-config \
+    libssl-dev \
+    git \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Working directory
+WORKDIR /workspace
+
+# Copy project files
+COPY --chown=sandbox:sandbox . /workspace/
+
+# Pre-build dependencies if Cargo.toml exists
+RUN if [ -f Cargo.toml ]; then \
+    cargo fetch || true; \
+    fi
+
+# Security: Drop privileges
+USER sandbox
+
+# Set cargo cache location
+ENV CARGO_HOME=/workspace/.cargo
+
+# Default command (overridden by sandbox runner)
+CMD ["/bin/bash"]
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD test -d /workspace || exit 1

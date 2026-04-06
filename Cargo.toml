@@ -1,0 +1,86 @@
+[package]
+name = "droxide_rust"
+version = "1.0.0"
+edition = "2021"
+
+[lib]
+path = "src-rust/lib.rs"
+name = "droxide"
+crate-type = ["staticlib", "rlib"]
+[dependencies]
+tokio = { version = "1.35", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+uuid = { version = "1.6", features = ["v4", "serde"] }
+thiserror = "1.0"
+tracing = "0.1"
+tracing-subscriber = "0.3"
+crossbeam = "0.8"
+parking_lot = "0.12"
+anyhow = "1.0"
+
+# Qt integration
+cxx-qt = "0.6.1"
+cxx = "1.0.120"
+cxx-qt-build = { version = "0.6.1", optional = true }
+
+# Rust ecosystem
+git2 = "0.18"
+notify = "6.1"
+tree-sitter = "0.20"
+tree-sitter-rust = "0.20"
+tree-sitter-python = "0.20"
+tree-sitter-cpp = "0.20"
+tree-sitter-javascript = "0.20"
+
+# Vector DB & embeddings
+chroma = { version = "0.1", optional = true }  # We'll use local ChromaDB
+reqwest = { version = "0.11", features = ["json", "stream"] }
+tonic = "0.10"
+prost = "0.12"
+
+# Docker (using bollard as primary client)
+bollard = "0.16"
+tar = "0.4"
+futures-util = "0.3"
+
+# LLM inference (optional - requires libclang)
+llama_cpp = { version = "0.3.2", optional = true }
+
+# File/path handling
+walkdir = "2.4"
+regex = "1.10"
+tempfile = "3.8"
+
+# Serialization
+bincode = "1.3"
+
+# Logging & audit
+env_logger = "0.10"
+chrono = "0.4"
+
+# String utilities
+once_cell = "1.19"
+validator = { version = "0.18", features = ["derive"] }
+
+# Additional dependencies
+async-trait = "0.1"
+dashmap = "5.5"
+lru = "0.12"
+backoff = { version = "0.4", features = ["tokio"] }
+num_cpus = "1.16"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true
+
+[features]
+default = []
+llama = ["llama_cpp"]
+docker = []
+full = ["llama", "docker"]
+[[example]]  
+name = "full_demo"  
+path = "examples/full_demo.rs" 

@@ -1,0 +1,48 @@
+﻿{
+  "configurations": [
+    {
+      "name": "x64-Debug",
+      "generator": "Ninja",
+      "configurationType": "Debug",
+      "inheritEnvironments": [ "msvc_x64_x64" ],
+      "buildRoot": "${projectDir}\\out\\build\\${name}",
+      "installRoot": "${projectDir}\\out\\install\\${name}",
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "",
+      "ctestCommandArgs": "",
+      "intelliSenseMode": "windows-msvc-x64",
+      "variables": [
+        {
+          "name": "CMAKE_VERBOSE_MAKEFILE",
+          "value": "True",
+          "type": "BOOL"
+        },
+        {
+          "name": "CMAKE_SKIP_RPATH",
+          "value": "True",
+          "type": "BOOL"
+        },
+        {
+          "name": "CMAKE_SKIP_INSTALL_RPATH",
+          "value": "True",
+          "type": "BOOL"
+        },
+        {
+          "name": "CMAKE_EXPORT_BUILD_DATABASE",
+          "value": "True",
+          "type": "BOOL"
+        },
+        {
+          "name": "CMAKE_EXPORT_COMPILE_COMMANDS",
+          "value": "True",
+          "type": "BOOL"
+        },
+        {
+          "name": "Qt6_DIR",
+          "value": "C:/qt/qt-everywhere-src-6.11.0",
+          "type": "PATH"
+        }
+      ]
+    }
+  ]
+}

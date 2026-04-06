@@ -1,0 +1,37 @@
+# Python 3.11 Sandbox for DroxIDE
+# Secure, minimal environment for running Python tests
+FROM python:3.11-slim
+
+# Security: Run as non-root user
+RUN groupadd -r sandbox && useradd -r -g sandbox -d /workspace -s /bin/bash sandbox
+
+# Working directory
+WORKDIR /workspace
+
+# Install common testing dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    git \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy project files
+COPY --chown=sandbox:sandbox . /workspace/
+
+# Install Python dependencies if requirements exist
+RUN if [ -f requirements.txt ]; then \
+    pip install --no-cache-dir -r requirements.txt; \
+    fi
+
+# Install pytest for testing
+RUN pip install --no-cache-dir pytest pytest-cov
+
+# Security: Drop privileges
+USER sandbox
+
+# Default command (overridden by sandbox runner)
+CMD ["/bin/bash"]
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD test -d /workspace || exit 1

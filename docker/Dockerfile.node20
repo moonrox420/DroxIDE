@@ -1,0 +1,38 @@
+# Node.js 20 Sandbox for DroxIDE
+# Secure environment for running Node.js tests
+FROM node:20-slim
+
+# Security: Run as non-root user
+RUN groupadd -r sandbox && useradd -r -g sandbox -d /workspace -s /bin/bash sandbox
+
+# Install system dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    git \
+    curl \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Working directory
+WORKDIR /workspace
+
+# Copy project files
+COPY --chown=sandbox:sandbox . /workspace/
+
+# Install dependencies if package.json exists
+RUN if [ -f package.json ]; then \
+    npm ci --ignore-scripts || npm install --ignore-scripts; \
+    fi
+
+# Install testing frameworks globally
+RUN npm install -g jest mocha typescript ts-node @types/node
+
+# Security: Drop privileges
+USER sandbox
+
+# Default command (overridden by sandbox runner)
+CMD ["/bin/bash"]
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD test -d /workspace || exit 1
