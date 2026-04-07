@@ -1,4 +1,4 @@
-// src-rust/code_search_engine.rs
+3// src-rust/code_search_engine.rs
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, VecDeque};
 use std::path::Path;
@@ -10,6 +10,9 @@ use thiserror::Error;
 use dashmap::DashMap;
 use lru::LruCache;
 use std::num::NonZeroUsize;
+use walkdir::WalkDir;
+use chrono::Utc;
+use tree_sitter::{Parser, Query, Language};
 
 use crate::ast_query_patterns::AstQueryPatterns;
 use crate::semantic_embedding::{SemanticEmbedder, SemanticEmbedding};

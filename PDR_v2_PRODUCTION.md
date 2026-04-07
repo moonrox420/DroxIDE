@@ -626,7 +626,7 @@ impl LlamaPool {
 ## 8. Roadmap
 
 ### Step 1
-- Qt 6 app skeleton (menu bar, editor, terminals)
+- Qt 6 app (menu bar, editor, terminals)
 - Folder watcher, chunker, ChromaDB setup
 - Basic Swarm (Researcher, Coder agents)
 - Metrics logging

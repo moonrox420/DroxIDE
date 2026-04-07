@@ -63,7 +63,7 @@ impl AstSearchEngine {
         let mut results = Vec::new();
 
         // 1. Structural search using Tree-sitter queries
-        let structural_matches = self.structural_search(query_text, codebase_path).await?;
+let structural_matches = self.structural_search(query_text, codebase_path).await.map_err(|e| e.to_string())?;
 
         // 2. Semantic search over existing RAG documents (simulated; real ChromaDB in prod)
         let semantic_matches = self.semantic_search(&embedding, codebase_path).await?;

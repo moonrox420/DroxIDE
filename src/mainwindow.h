@@ -1,34 +1,40 @@
-// src/mainwindow.h
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
 #include <QMainWindow>
 #include <QSplitter>
-#include <QStackedWidget>
 #include <QLabel>
 #include <QProgressBar>
+#include <QStringList>
 #include <memory>
 
-class EditorWidget;
+// Forward declarations to keep compile times lean
+class Editor;
 class TerminalWidget;
 class ExplorerWidget;
 class AgentTraceWidget;
 class RagHeatmapWidget;
 class GitManager;
 class LspClient;
+class SwarmBridge; // The FFI Bridge to Rust
 
-class MainWindow : public QMainWindow {
+/**
+ * @brief DroxIDE Main Window
+ * Coordinates the Qt 6 frontend with the Rust-based Agent Swarm.
+ */
+class MainWindow : public QMainWindow
+{
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+    explicit MainWindow(QWidget *parent = nullptr);
+    ~MainWindow() override;
 
 protected:
     void closeEvent(QCloseEvent *event) override;
 
 private slots:
-    // File menu
+    // --- File & Workspace ---
     void onNewFile();
     void onNewFolder();
     void onOpenFolder();
@@ -37,7 +43,15 @@ private slots:
     void onCloseTab();
     void onPreferences();
 
-    // Edit menu
+    // --- View Management ---
+    void onToggleExplorer();
+    void onToggleTerminal();
+    void onToggleAgentTrace();
+    void onToggleRagHeatmap();
+    void onZoomIn();
+    void onZoomOut();
+
+    // --- Edit Operations ---
     void onUndo();
     void onRedo();
     void onCut();
@@ -48,17 +62,7 @@ private slots:
     void onFindInFiles();
     void onRefactor();
 
-    // View menu
-    void onToggleExplorer();
-    void onToggleTerminal();
-    void onToggleAgentTrace();
-    void onToggleRagHeatmap();
-    void onToggleSidebar();
-    void onTogglePanel();
-    void onZoomIn();
-    void onZoomOut();
-
-    // Terminal menu
+    // --- Terminal Operations ---
     void onNewTerminal();
     void onNewTerminalGitBash();
     void onNewTerminalPowerShell();
@@ -66,67 +70,75 @@ private slots:
     void onKillTerminal();
     void onClearTerminal();
 
-    // Git menu
-    void onCommit();
-    void onPush();
-    void onPull();
-    void onBranch();
+    // --- Git Operations ---
     void onStash();
-    void onBlame();
+    void onBranch();
 
-    // Tools menu
+    // --- AI Swarm Operations ---
     void onRunSwarm();
     void onVoiceDictate();
     void onSandboxTest();
     void onClearRagIndex();
-    void onAuditLogs();
+    
+    // --- Git Operations ---
+    void onCommit();
+    void onPush();
+    void onPull();
+    void onBlame();
 
-    // Help menu
+    // --- Bridge Callbacks (Rust -> C++) ---
+    // These should be invoked via Qt::QueuedConnection for thread safety
+    void onAgentMessage(const QString &json);
+    void onSwarmStateChanged(const QString &state);
+    void onUserActionRequired(const QString &payload);
+
+    // --- Help & Logs ---
     void onDocumentation();
     void onKeyboardShortcuts();
     void onAgentGuide();
     void onDebugLogs();
     void onAbout();
 
-    // Agent events from Rust
-    void onAgentMessage(const QString &json);
-    void onSwarmStateChanged(const QString &state);
-    void onUserActionRequired(const QString &payload);
-
 private:
+    // Initialization
+    void setupBranding();
+    void initUi();
+    void applyTheme();
     void createMenuBar();
     void createToolBar();
     void createCentralWidget();
-    void createDockWidgets();
     void createStatusBar();
+    void connectSignals();
+    
+    // Persistence
     void loadSettings();
     void saveSettings();
-    void connectSignals();
+    void updateRecentFiles(const QString &path);
 
-    // UI Components
-    EditorWidget *mEditor = nullptr;
-    TerminalWidget *mTerminal = nullptr;
-    ExplorerWidget *mExplorer = nullptr;
-    AgentTraceWidget *mAgentTrace = nullptr;
-    RagHeatmapWidget *mRagHeatmap = nullptr;
+    // --- UI Components (RAII managed by Qt parent system) ---
+    Editor* mEditor       = nullptr;
+    TerminalWidget* mTerminal     = nullptr;
+    ExplorerWidget* mExplorer     = nullptr;
+    AgentTraceWidget* mAgentTrace   = nullptr;
+    RagHeatmapWidget* mRagHeatmap   = nullptr;
 
-    // Core managers
-    std::unique_ptr<GitManager> mGitManager;
-    std::unique_ptr<LspClient> mLspClient;
+    // --- Layout Components ---
+    QSplitter* mMainSplitter   = nullptr; // [Explorer | Editor/Terminal | Trace/RAG]
+    QSplitter* mEditorSplitter = nullptr; // [Editor | Terminal]
 
-    // Layout
-    QSplitter *mMainSplitter = nullptr;
-    QSplitter *mEditorSplitter = nullptr;
-    QStackedWidget *mViewStack = nullptr;
+    // --- Status Bar Widgets ---
+    QLabel* mStatusLabel    = nullptr;
+    QLabel* mLineColLabel   = nullptr;
+    QProgressBar* mSwarmProgress  = nullptr;
 
-    // Status bar
-    QLabel *mStatusLabel = nullptr;
-    QLabel *mLineColLabel = nullptr;
-    QProgressBar *mSwarmProgress = nullptr;
+    // --- Backend Managers (RAII managed by std::unique_ptr) ---
+    std::unique_ptr<GitManager>  mGitManager;
+    std::unique_ptr<LspClient>   mLspClient;
+    std::unique_ptr<SwarmBridge> mSwarmBridge; // Handles Rust orchestration
 
-    // Recent files
+    // --- State ---
     QStringList mRecentFiles;
-    static const int MAX_RECENT = 10;
+    static constexpr int MAX_RECENT = 10;
 };
 
 #endif // MAINWINDOW_H

@@ -33,26 +33,38 @@ find_package(Qt6 6.5 COMPONENTS
     Gui
     Widgets
     Network
-    CONFIG)
+    CONFIG QUIET)
 
-if(NOT Qt6_FOUND)
-    message(WARNING "Qt6 not found. Building Rust core only. Install Qt6 for full UI build.")
-    message(WARNING "  Windows: vcpkg install qt6-base qt6-tools --triplet x64-windows")
-    message(WARNING "  Then set -DCMAKE_PREFIX_PATH=C:/vcpkg/installed/x64-windows/share")
+ sage(STATUS "║                                                                  ║")
+    message(STATUS "║  To build full UI:                                               ║")
+    message(STATUS "║  Windows: vcpkg install qt6-base qt6-tools --triplet x64-windows║")
+    message(STATUS "║  Then add: -DCMAKE_PREFIX_PATH=C:/vcpkg/installed/x64-windows   ║")
+    message(STATUS "╚══════════════════════════════════════════════════════════════════╝")
 endif()
 
 # Corrosion for Rust core (strict 2026 standards)
 include(FetchContent)
-FetchContent_Declare(Corrosion
+fetchcontent_declare(Corrosion
     GIT_REPOSITORY https://github.com/corrosion-rs/corrosion.git
-    GIT_TAG v0.4.0
+    GIT_TAG v0.4.5
     GIT_SHALLOW TRUE)
-FetchContent_MakeAvailable(Corrosion)
+fetchcontent_makeavailable(Corrosion)
+
+# Explicitly set Rust toolchain to MSVC
+set(Rust_TOOLCHAIN "stable-x86_64-pc-windows-msvc" CACHE STRING "Rust toolchain to use")
+set(Rust_COMPILER "$ENV{USERPROFILE}\\.cargo\\bin\\rustc.exe" CACHE FILEPATH "Path to Rust compiler")
+
+# Configure Rust flags for Windows MSVC
+set(RUSTFLAGS "-Z unstable-options" CACHE STRING "Rust compiler flags")
+set(Corrosion_RUSTFLAGS ${RUSTFLAGS})
 
 corrosion_import_crate(MANIFEST_PATH Cargo.toml)
 
 # Only build Qt UI if Qt6 is found
 if(Qt6_FOUND)
+    set(ENV{RUSTFLAGS} "-Z unstable-options")
+    message(STATUS "✅ Qt6 found. Building full DroxIDE UI application")
+
     # Complete source list per DroxIDE spec
     set(SOURCES
         src/main.cpp
@@ -92,6 +104,18 @@ if(Qt6_FOUND)
         Qt6::Widgets
         Qt6::Network
         droxide_rust
+    )
+
+    # Fix include directory paths (CRITICAL ROOT CAUSE FIX)
+    target_include_directories(DroxIDE PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/editor
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/terminal
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/explorer
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/panels
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/dialogs
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/git
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/lsp
     )
 
     # Production security & Qt hardening

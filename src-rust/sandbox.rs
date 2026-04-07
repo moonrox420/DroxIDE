@@ -241,7 +241,7 @@ impl Sandbox {
                 tests_failed: if exit_code == 0 { 0_usize } else { 3_usize },
                 coverage: 0.87_f32,
             })
-        }).await.map_err(|_| SandboxError::Timeout(timeout_secs))??;
+        }).await.map_err(|_| SandboxError::Timeout(timeout_secs))?;
 
         Ok(result)
     }

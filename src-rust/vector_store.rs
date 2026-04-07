@@ -154,7 +154,7 @@ impl VectorStore for ChromaVectorStore {
         limit: usize,
         where_filter: Option<serde_json::Value>,
     ) -> Result<Vec<RagDocument>, VectorStoreError> {
-        let embedding = self.llm_pool.embed(query_text).await
+let embedding = self.llm_pool.embed(query_text).await
             .map_err(|e| VectorStoreError::Operation(e.to_string()))?;
 
         let payload = serde_json::json!({

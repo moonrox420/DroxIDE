@@ -1,81 +1,92 @@
 // src/ffi_bridge.cpp
-// Bridge between Qt C++ and Rust core
-// This file provides C-compatible FFI functions that mainwindow.cpp calls
-
+// src/ffi_bridge.cpp (Refined)
 #include <string>
 #include <vector>
 #include <cstring>
+#include <iostream>
 
-// External Rust FFI functions (linked from Rust staticlib)
+// Use the namespace we defined to keep things clean
+namespace DroxBridge {
+
+char* run_swarm(const char* prompt, const std::vector<const char*>& files) {
+    if (!prompt) return nullptr;
+    
+    // The cast below resolves the "const char *const *" vs "const char **" mismatch
+    // by explicitly passing the data pointer of the vector.
+    return rust_run_swarm(
+        prompt, 
+        const_cast<const char**>(files.data()), 
+        static_cast<int>(files.size())
+    );
+}
+
+} 
+/**
+ * PRODUCTION NOTE: 
+ * We use a dedicated namespace to avoid polluting the global C scope
+ * and ensure that the C++ wrappers handle pointer lifecycle strictly.
+ */
+
 extern "C" {
-    int init_orchestrator();
-    char* run_swarm(const char* prompt, const char** context_files, int file_count);
-    int accept_diff(const char* diff_id);
-    int reject_diff(const char* diff_id, const char* feedback);
-    char* get_orchestrator_state();
-    char* get_metrics_summary();
+    // Low-level symbols linked from the Rust staticlib (.a / .lib)
+    // Rust side must use #[no_mangle] and pub extern "C"
+    int rust_init_orchestrator();
+    char* rust_run_swarm(const char* prompt, const char** context_files, int file_count);
+    int rust_accept_diff(const char* diff_id);
+    int rust_reject_diff(const char* diff_id, const char* feedback);
+    char* rust_get_metrics_summary();
+    void rust_free_string(char* s); // Rust must provide this to free its own Box<str>
 }
 
-// Helper to convert Rust string to C string (caller must free)
-static char* rust_string_to_c(const char* rust_str) {
-    if (!rust_str) return nullptr;
-    size_t len = strlen(rust_str);
-    char* c_str = (char*)malloc(len + 1);
-    if (c_str) {
-        memcpy(c_str, rust_str, len);
-        c_str[len] = '\0';
-    }
-    return c_str;
+namespace DroxBridge {
+
+// Initializer: Returns 0 on success
+int init_orchestrator() {
+    // Rust should return an error code instead of panicking
+    return rust_init_orchestrator();
 }
 
-extern "C" {
+// Wrapper for running the swarm
+// Returns a JSON string (caller is responsible for calling free_string)
 
-void init_orchestrator_ffi() {
+char* run_swarm_ffi(const char* prompt, const std::vector<const char*>& files) {
     try {
-        init_orchestrator();
-    } catch (const std::exception& e) {
-        fprintf(stderr, "Failed to initialize orchestrator: %s\n", e.what());
-    }
-}
-
-char* run_swarm_ffi(const char* prompt, const char** context_files, int file_count) {
-    try {
-        return run_swarm(prompt, context_files, file_count);
+        // Files.data() returns const char* const*, but Rust's extern "C" 
+        // usually expects const char**. We cast the top-level pointer.
+        return rust_run_swarm(
+            prompt, 
+            const_cast<const char**>(files.data()), 
+            static_cast<int>(files.size())
+        );
     } catch (const std::exception& e) {
         fprintf(stderr, "Swarm execution failed: %s\n", e.what());
         return nullptr;
     }
 }
 
-void accept_diff_ffi(const char* diff_id) {
-    try {
-        accept_diff(diff_id);
-    } catch (const std::exception& e) {
-        fprintf(stderr, "Failed to accept diff: %s\n", e.what());
-    }
+// HITL: Accept a suggested change
+void accept_diff(const std::string& diff_id) {
+    if (diff_id.empty()) return;
+    rust_accept_diff(diff_id.c_str());
 }
 
-void reject_diff_ffi(const char* diff_id, const char* feedback) {
-    try {
-        reject_diff(diff_id, feedback);
-    } catch (const std::exception& e) {
-        fprintf(stderr, "Failed to reject diff: %s\n", e.what());
-    }
+// HITL: Reject with feedback for the Janitor agent to learn
+void reject_diff(const std::string& diff_id, const std::string& feedback) {
+    if (diff_id.empty()) return;
+    rust_reject_diff(diff_id.c_str(), feedback.c_str());
 }
 
-char* get_metrics_summary_ffi() {
-    try {
-        return get_metrics_summary();
-    } catch (const std::exception& e) {
-        fprintf(stderr, "Failed to get metrics: %s\n", e.what());
-        return nullptr;
-    }
+// Metrics Retrieval
+char* get_metrics() {
+    return rust_get_metrics_summary();
 }
 
-void free_string_ffi(char* str) {
+// CRITICAL: Memory safety helper
+// Rust strings allocated with CString::into_raw must be freed by Rust's allocator
+void free_rust_string(char* str) {
     if (str) {
-        free(str);
+        rust_free_string(str);
     }
 }
 
-} // extern "C"
+} // namespace DroxBridge

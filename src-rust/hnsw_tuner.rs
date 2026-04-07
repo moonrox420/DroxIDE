@@ -7,6 +7,7 @@ use uuid::Uuid;
 use thiserror::Error;
 use std::num::NonZeroUsize;
 use lru::LruCache;
+use parking_lot::Mutex as ParkingLotMutex;
 
 #[derive(Error, Debug)]
 pub enum HnswTunerError {
@@ -46,14 +47,14 @@ pub enum WorkloadType {
 #[derive(Clone)]
 pub struct HnswTuner {
     cache: Arc<Mutex<LruCache<String, HnswParams>>>,
-    last_profile: Arc<parking_lot::Mutex<Option<CorpusProfile>>>,
+    last_profile: Arc<ParkingLotMutex<Option<CorpusProfile>>>,
 }
 
 impl HnswTuner {
     pub fn new() -> Self {
         HnswTuner {
             cache: Arc::new(Mutex::new(LruCache::new(NonZeroUsize::new(50).unwrap()))),
-            last_profile: Arc::new(parking_lot::Mutex::new(None)),
+            last_profile: Arc::new(ParkingLotMutex::new(None)),
         }
     }
 
@@ -109,7 +110,7 @@ impl HnswTuner {
             workload,
         };
 
-        *self.last_profile.lock() = Some(profile.clone());
+        self.last_profile.lock().put(Some(profile.clone()));
         Ok(profile)
     }
 

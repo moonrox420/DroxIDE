@@ -1,0 +1,92 @@
+name: DroxIDE CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-rust:
+    name: Rust Backend
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+
+      - name: Cache Rust dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            target/
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Check Rust formatting
+        run: cargo fmt --check
+
+      - name: Clippy lints
+        run: cargo clippy --all-targets --all-features -- -D warnings
+
+      - name: Run Rust tests
+        run: cargo test --verbose
+
+  build-cpp:
+    name: C++ QT6 Frontend
+    runs-on: windows-latest
+    needs: build-rust
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install QT6
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.7.0'
+          host: 'windows'
+          target: 'desktop'
+          arch: 'win64_msvc2022_64'
+          modules: 'qtmultimedia qtwebengine'
+
+      - name: Configure CMake
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build C++
+        run: cmake --build build --config Release
+
+  build-typescript:
+    name: TypeScript Svelte Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: '--typescript/package-lock.json'
+
+      - name: Install dependencies
+        working-directory: --typescript
+        run: npm ci
+
+      - name: Lint
+        working-directory: --typescript
+        run: npm run lint
+
+      - name: Build
+        working-directory: --typescript
+        run: npm run build
+
+  all-checks:
+    name: All Checks Passed
+    runs-on: ubuntu-latest
+    needs: [build-rust, build-cpp, build-typescript]
+    steps:
+      - run: echo "✅ All CI stages completed successfully"

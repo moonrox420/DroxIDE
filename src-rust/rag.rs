@@ -22,9 +22,20 @@ pub enum RagError {
     #[error("Embedding failed: {0}")]
     Embedding(#[from] crate::llama::LlamaError),
     #[error("Semantic embedding failed: {0}")]
-    SemanticEmbedding(#[from] crate::semantic_embedding::EmbeddingError),
+    Embedding(#[from] crate::semantic_embedding::EmbeddingError),
     #[error("IO error: {0}")]
     Io(#[from] std::io::Error),
+    #[error("Query pattern error: {0}")]
+    Query(#[from] crate::ast_query_patterns::QueryError),
+    #[error("Query compilation error: {0}")]
+    QueryCompilation(String),
+}
+
+impl From<tree_sitter::QueryError> for RagError {
+    fn from(e: tree_sitter::QueryError) -> Self {
+        RagError::QueryCompilation(format!("Query compilation failed: {:?}", e))
+    }
+}
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -170,10 +181,8 @@ impl OptimizedChunker {
             .ok_or_else(|| RagError::Parse("Failed to parse source".into()))?;
 
         let root = tree.root_node();
-        let query_source = self.query_patterns.get_chunk_query(language)
-            .map_err(|e| RagError::Parse(format!("get_chunk_query failed: {}", e)))?;
-        let query = Query::new(lang, query_source)
-            .map_err(|e| RagError::Parse(format!("Query::new failed: {}", e)))?;
+        let query_source = self.query_patterns.get_chunk_query(language)?;
+        let query = Query::new(lang, query_source)?;
 
         let mut cursor = QueryCursor::new();
         let matches = cursor.matches(&query, root, code.as_bytes());

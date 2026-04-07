@@ -86,12 +86,10 @@ impl Orchestrator {
         self.state = OrchestratorState::Researching;
         self.notify_state_change().await;
 
-        let current_dir = std::env::current_dir().unwrap();
-        let current_dir_str = current_dir.to_string_lossy().to_string();
-        
+let current_dir = std::env::current_dir().unwrap().to_string_lossy().to_string();
         let (researcher_output, architect_output) = tokio::join!(
             self.researcher.research(prompt, &self.rag),
-            self.architect.analyze(&current_dir_str)
+            self.architect.analyze(&current_dir)
         );
 
         self.state = OrchestratorState::Pruning;
@@ -145,6 +143,7 @@ impl Orchestrator {
     }
 
     pub fn accept_diff(&mut self, diff_id: &str) -> Result<(), String> {
+        // diff_id is intentionally unused
         self.state = OrchestratorState::Applying;
         self.pending_diff = None;
         self.state = OrchestratorState::Done;
@@ -153,6 +152,7 @@ impl Orchestrator {
     }
 
     pub fn reject_diff(&mut self, diff_id: &str, feedback: &str) -> Result<(), String> {
+        // diff_id and feedback are intentionally unused
         self.metrics.increment_rejected();
         self.state = OrchestratorState::Idle;
         self.pending_diff = None;
