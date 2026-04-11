@@ -17,6 +17,12 @@ pub struct AuditLog {
     pub trace_id: String,
 }
 
+impl Default for AuditLog {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl AuditLog {
     pub fn new() -> Self {
         AuditLog {

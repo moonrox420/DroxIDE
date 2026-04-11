@@ -1,18 +1,15 @@
-3// src-rust/code_search_engine.rs
+// src-rust/code_search_engine.rs
 use serde::{Deserialize, Serialize};
-use std::collections::{HashMap, VecDeque};
+use std::collections::HashMap;
 use std::path::Path;
 use std::sync::Arc;
 use tokio::sync::Mutex;
-use tracing::{instrument, info, error};
+use tracing::{instrument, info};
 use uuid::Uuid;
 use thiserror::Error;
 use dashmap::DashMap;
 use lru::LruCache;
 use std::num::NonZeroUsize;
-use walkdir::WalkDir;
-use chrono::Utc;
-use tree_sitter::{Parser, Query, Language};
 
 use crate::ast_query_patterns::AstQueryPatterns;
 use crate::semantic_embedding::{SemanticEmbedder, SemanticEmbedding};
@@ -26,7 +23,7 @@ use crate::rag::RagDocument;
 ///   3. Hybrid Ranking Engine (weighted fusion + git ancestry boost)
 ///   4. LRU + DashMap Cache Layer (query → results)
 ///   5. Incremental Index Updater (file watcher integration ready)
-/// Used by: ResearcherAgent, ArchitectAgent, Editor "Find in Files", RAG Pipeline
+///      Used by: ResearcherAgent, ArchitectAgent, Editor "Find in Files", RAG Pipeline
 
 #[derive(Error, Debug)]
 pub enum CodeSearchError {
@@ -39,6 +36,8 @@ pub enum CodeSearchError {
     #[error("Unsupported language: {0}")]
     UnsupportedLanguage(String),
     #[error("IO error: {0}")]
+    Io(#[from] std::io::Error),
+    #[error("Other error: {0}")]
     Other(String),
 }
 
@@ -124,10 +123,10 @@ impl CodeSearchEngine {
     }
 
     /// Pure structural search using Tree-sitter (fast path)
-    #[instrument(name = "code_search_structural", skip(self, query_text, codebase_path))]
+    #[instrument(name = "code_search_structural", skip(self))]
     async fn structural_search(
         &self,
-        query_text: &str,
+        _query_text: &str,
         codebase_path: &Path,
     ) -> Result<Vec<CodeSearchResult>, CodeSearchError> {
         let mut results = Vec::new();
@@ -142,7 +141,7 @@ impl CodeSearchEngine {
             let lang = self.detect_language(entry.path());
 
             let query_source = self.query_patterns.get_search_query(&lang)
-                .map_err(|e| CodeSearchError::Structural(e))?;
+                .map_err(CodeSearchError::Structural)?;
             let mut parser = tree_sitter::Parser::new();
             let language = self.get_tree_sitter_language(&lang)?;
 
@@ -153,7 +152,7 @@ impl CodeSearchEngine {
                 .ok_or_else(|| CodeSearchError::Structural(crate::ast_query_patterns::QueryError::CompilationError("parse failed".into())))?;
 
             let root = tree.root_node();
-            let query = tree_sitter::Query::new(language, &query_source)
+            let query = tree_sitter::Query::new(language, query_source)
                 .map_err(|e| CodeSearchError::Structural(crate::ast_query_patterns::QueryError::CompilationError(format!("Query::new failed: {}", e))))?;
 
             let mut cursor = tree_sitter::QueryCursor::new();
@@ -198,11 +197,11 @@ impl CodeSearchEngine {
     }
 
     /// Semantic vector search over indexed embeddings
-    #[instrument(name = "code_search_semantic", skip(self, query_embedding, codebase_path))]
+    #[instrument(name = "code_search_semantic", skip(self))]
     async fn semantic_search(
         &self,
         query_embedding: &SemanticEmbedding,
-        codebase_path: &Path,
+        _codebase_path: &Path,
     ) -> Result<Vec<CodeSearchResult>, CodeSearchError> {
         let mut results = Vec::new();
 
@@ -237,7 +236,7 @@ impl CodeSearchEngine {
         &self,
         structural: Vec<CodeSearchResult>,
         semantic: Vec<CodeSearchResult>,
-        query_embedding: &SemanticEmbedding,
+        _query_embedding: &SemanticEmbedding,
     ) -> Result<Vec<CodeSearchResult>, CodeSearchError> {
         let mut merged = HashMap::new();
 
@@ -320,19 +319,11 @@ impl CodeSearchEngine {
 
     fn get_tree_sitter_language(&self, lang: &str) -> Result<tree_sitter::Language, CodeSearchError> {
         match lang {
-            "rust" => unsafe { Ok(tree_sitter_rust()) },
-            "python" => unsafe { Ok(tree_sitter_python()) },
-            "cpp" => unsafe { Ok(tree_sitter_cpp()) },
-            "javascript" => unsafe { Ok(tree_sitter_javascript()) },
+            "rust" => Ok(tree_sitter_rust::language()),
+            "python" => Ok(tree_sitter_python::language()),
+            "cpp" => Ok(tree_sitter_cpp::language()),
+            "javascript" => Ok(tree_sitter_javascript::language()),
             _ => Err(CodeSearchError::UnsupportedLanguage(lang.to_string())),
         }
     }
-}
-
-// Tree-sitter language externs (required for Rust FFI)
-extern "C" {
-    fn tree_sitter_rust() -> tree_sitter::Language;
-    fn tree_sitter_python() -> tree_sitter::Language;
-    fn tree_sitter_cpp() -> tree_sitter::Language;
-    fn tree_sitter_javascript() -> tree_sitter::Language;
 }

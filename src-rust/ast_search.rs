@@ -1,11 +1,10 @@
 // src-rust/ast_search.rs
 use serde::{Deserialize, Serialize};
-use std::path::{Path, PathBuf};
-use tree_sitter::{Parser, Language, Query, QueryCursor, Node};
-use tracing::{instrument, info, error};
+use std::path::Path;
+use tree_sitter::{Parser, Language, Query, QueryCursor};
+use tracing::{instrument, info};
 use uuid::Uuid;
 use thiserror::Error;
-use std::collections::HashMap;
 use crate::llama::LlamaPool;
 use crate::rag::RagDocument;
 use chrono::Utc;
@@ -63,7 +62,7 @@ impl AstSearchEngine {
         let mut results = Vec::new();
 
         // 1. Structural search using Tree-sitter queries
-let structural_matches = self.structural_search(query_text, codebase_path).await.map_err(|e| e.to_string())?;
+        let structural_matches = self.structural_search(query_text, codebase_path).await?;
 
         // 2. Semantic search over existing RAG documents (simulated; real ChromaDB in prod)
         let semantic_matches = self.semantic_search(&embedding, codebase_path).await?;
@@ -170,11 +169,11 @@ let structural_matches = self.structural_search(query_text, codebase_path).await
     }
 
     /// Pure semantic search (embedding-based) with AST metadata enrichment
-    #[instrument(name = "ast_semantic_search", skip(self, query_embedding, codebase_path))]
+    #[instrument(name = "ast_semantic_search", skip(self))]
     async fn semantic_search(
         &self,
-        query_embedding: &[f32],
-        codebase_path: &Path,
+        _query_embedding: &[f32],
+        _codebase_path: &Path,
     ) -> Result<Vec<AstSearchResult>, AstSearchError> {
         // Production: query real ChromaDB with cosine similarity + AST boost
         // For now we simulate with high-fidelity placeholder that would return real documents
@@ -224,44 +223,28 @@ let structural_matches = self.structural_search(query_text, codebase_path).await
         }
     }
 
-    fn get_structural_query(&self, lang: &str, query_text: &str) -> String {
+    fn get_structural_query(&self, lang: &str, _query_text: &str) -> String {
         // Production query templates – can be extended with user-provided patterns
         match lang {
-            "rust" => format!(
-                r#"
+            "rust" => r#"
                 (function_item name: (identifier) @fn_name) @fn
                 (struct_item name: (type_identifier) @struct_name) @struct
                 (impl_item) @impl
                 (call_expression function: (identifier) @call) @call_expr
-                "#,
-            ),
-            "python" => format!(
-                r#"
+                "#.to_string(),
+            "python" => r#"
                 (function_definition name: (identifier) @fn_name) @fn
                 (class_definition name: (identifier) @class_name) @class
-                "#,
-            ),
-            "cpp" => format!(
-                r#"
+                "#.to_string(),
+            "cpp" => r#"
                 (function_definition declarator: (function_declarator declarator: (identifier) @fn_name)) @fn
                 (class_specifier name: (type_identifier) @class_name) @class
-                "#,
-            ),
-            "javascript" => format!(
-                r#"
+                "#.to_string(),
+            "javascript" => r#"
                 (function_declaration name: (identifier) @fn_name) @fn
                 (class_declaration name: (identifier) @class_name) @class
-                "#,
-            ),
+                "#.to_string(),
             _ => r#"(statement) @stmt"#.to_string(),
         }
     }
-}
-
-// Required Tree-sitter language externs (already declared in rag.rs – re-exported here for clarity)
-extern "C" {
-    fn tree_sitter_rust() -> Language;
-    fn tree_sitter_python() -> Language;
-    fn tree_sitter_cpp() -> Language;
-    fn tree_sitter_javascript() -> Language;
 }

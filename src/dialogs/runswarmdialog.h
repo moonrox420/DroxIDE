@@ -1,4 +1,4 @@
-// src/dialogs/runswarmdialog.h
+﻿// src/dialogs/runswarmdialog.h
 #ifndef RUNSWARMDIALOG_H
 #define RUNSWARMDIALOG_H
 
@@ -20,7 +20,7 @@ public:
     bool blockOnReview() const;
     bool autoApplyIfHighConfidence() const;
 
-private slots:
+private Q_SLOTS:
     void onRunClicked();
 
 private:

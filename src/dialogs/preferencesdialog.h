@@ -1,4 +1,4 @@
-// src/dialogs/preferencesdialog.h
+﻿// src/dialogs/preferencesdialog.h
 #ifndef PREFERENCESDIALOG_H
 #define PREFERENCESDIALOG_H
 
@@ -13,7 +13,7 @@ class PreferencesDialog : public QDialog {
 public:
     PreferencesDialog(QWidget *parent = nullptr);
 
-private slots:
+private Q_SLOTS:
     void onApplyClicked();
     void onOkClicked();
 

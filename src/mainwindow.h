@@ -33,7 +33,7 @@ public:
 protected:
     void closeEvent(QCloseEvent *event) override;
 
-private slots:
+private Q_SLOTS:
     // --- File & Workspace ---
     void onNewFile();
     void onNewFolder();
@@ -103,6 +103,7 @@ private:
     // Initialization
     void setupBranding();
     void initUi();
+    void setupUi();
     void applyTheme();
     void createMenuBar();
     void createToolBar();

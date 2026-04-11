@@ -102,19 +102,19 @@ void MainWindow::onToggleRagHeatmap() {
 
 // Improved: Added proper error handling for settings operations
 void MainWindow::loadSettings() {
-    QSettings s("DroxIDE", "DroxIDE");
-    if (s.contains("geometry")) {
-        restoreGeometry(s.value("geometry").toByteArray());
+    QSettings s(QStringLiteral("DroxIDE"), QStringLiteral("DroxIDE"));
+    if (s.contains(QStringLiteral("geometry"))) {
+        restoreGeometry(s.value(QStringLiteral("geometry")).toByteArray());
     }
-    if (s.contains("state")) {
-        restoreState(s.value("state").toByteArray());
+    if (s.contains(QStringLiteral("state"))) {
+        restoreState(s.value(QStringLiteral("state")).toByteArray());
     }
 }
 
 void MainWindow::saveSettings() {
-    QSettings s("DroxIDE", "DroxIDE");
-    s.setValue("geometry", saveGeometry());
-    s.setValue("state", saveState());
+    QSettings s(QStringLiteral("DroxIDE"), QStringLiteral("DroxIDE"));
+    s.setValue(QStringLiteral("geometry"), saveGeometry());
+    s.setValue(QStringLiteral("state"), saveState());
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
@@ -126,7 +126,204 @@ void MainWindow::onDocumentation() {
     QDesktopServices::openUrl(QUrl("https://docs.droxide.com"));
 }
 
-void MainWindow::onAbout() { 
-    QMessageBox::about(this, tr("About DroxIDE"), 
+void MainWindow::onAbout() {
+    QMessageBox::about(this, tr("About DroxIDE"),
         tr("DroxIDE v1.0\nProfessional AI-Augmented IDE."));
+}
+
+// Stub implementations for missing functions
+MainWindow::MainWindow(QWidget *parent)
+    : QMainWindow(parent)
+{
+    mGitManager = std::make_unique<GitManager>();
+    mLspClient = std::make_unique<LspClient>();
+
+    setupBranding();
+    createMenuBar();
+    createToolBar();
+    createCentralWidget();
+    createStatusBar();
+    connectSignals();
+    loadSettings();
+}
+
+void MainWindow::initUi()
+{
+}
+
+void MainWindow::applyTheme()
+{
+}
+
+void MainWindow::createMenuBar()
+{
+}
+
+void MainWindow::createToolBar()
+{
+}
+
+void MainWindow::createCentralWidget()
+{
+}
+
+void MainWindow::createStatusBar()
+{
+}
+
+void MainWindow::onNewFile()
+{
+}
+
+void MainWindow::onNewFolder()
+{
+}
+
+void MainWindow::onOpenRecent(const QString &path)
+{
+    Q_UNUSED(path);
+}
+
+void MainWindow::onSaveAll()
+{
+}
+
+void MainWindow::onCloseTab()
+{
+}
+
+void MainWindow::onPreferences()
+{
+}
+
+void MainWindow::onZoomIn()
+{
+}
+
+void MainWindow::onZoomOut()
+{
+}
+
+void MainWindow::onUndo()
+{
+}
+
+void MainWindow::onRedo()
+{
+}
+
+void MainWindow::onCut()
+{
+}
+
+void MainWindow::onCopy()
+{
+}
+
+void MainWindow::onPaste()
+{
+}
+
+void MainWindow::onFind()
+{
+}
+
+void MainWindow::onFindReplace()
+{
+}
+
+void MainWindow::onFindInFiles()
+{
+}
+
+void MainWindow::onRefactor()
+{
+}
+
+void MainWindow::onNewTerminal()
+{
+}
+
+void MainWindow::onNewTerminalGitBash()
+{
+}
+
+void MainWindow::onNewTerminalPowerShell()
+{
+}
+
+void MainWindow::onNewTerminalCmd()
+{
+}
+
+void MainWindow::onKillTerminal()
+{
+}
+
+void MainWindow::onClearTerminal()
+{
+}
+
+void MainWindow::onBranch()
+{
+}
+
+void MainWindow::onRunSwarm()
+{
+}
+
+void MainWindow::onVoiceDictate()
+{
+}
+
+void MainWindow::onSandboxTest()
+{
+}
+
+void MainWindow::onClearRagIndex()
+{
+}
+
+void MainWindow::onCommit()
+{
+}
+
+void MainWindow::onBlame()
+{
+}
+
+void MainWindow::onAgentMessage(const QString &json)
+{
+    Q_UNUSED(json);
+}
+
+void MainWindow::onSwarmStateChanged(const QString &state)
+{
+    Q_UNUSED(state);
+}
+
+void MainWindow::onUserActionRequired(const QString &payload)
+{
+    Q_UNUSED(payload);
+}
+
+void MainWindow::onKeyboardShortcuts()
+{
+}
+
+void MainWindow::onAgentGuide()
+{
+}
+
+void MainWindow::onDebugLogs()
+{
+}
+
+void MainWindow::updateRecentFiles(const QString &path)
+{
+    Q_UNUSED(path);
+}
+
+void MainWindow::setupUi()
+{
 }

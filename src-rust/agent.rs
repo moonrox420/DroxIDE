@@ -1,7 +1,6 @@
 // src-rust/agent.rs
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
-use tracing::{instrument};
+use tracing::instrument;
 use crate::rag::RagPipeline;
 use crate::llama::LlamaPool;
 use crate::sandbox::Sandbox;

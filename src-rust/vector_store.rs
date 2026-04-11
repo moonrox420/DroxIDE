@@ -1,7 +1,7 @@
 // src-rust/vector_store.rs
 use crate::rag::RagDocument;
 use crate::vector_store_trait::{VectorStore, VectorStoreError};
-use crate::hnsw_tuner::{HnswTuner, HnswParams, WorkloadType};
+use crate::hnsw_tuner::{HnswTuner, WorkloadType};
 use crate::llama::LlamaPool;
 use async_trait::async_trait;
 use backoff::future::retry;
@@ -9,10 +9,9 @@ use backoff::ExponentialBackoff;
 use reqwest::{Client, StatusCode};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
-use tokio::sync::Mutex;
 use tracing::{instrument, info, error};
 use uuid::Uuid;
-use chrono::Utc;
+use std::io;
 
 /// Production-grade ChromaDB Vector Store with HNSW tuning
 #[derive(Clone)]
@@ -52,7 +51,7 @@ impl ChromaVectorStore {
         });
 
         let resp = self.client
-            .post(&format!("{}/api/v1/collections", self.base_url))
+            .post(format!("{}/api/v1/collections", self.base_url))
             .json(&payload)
             .send()
             .await
@@ -112,22 +111,16 @@ impl VectorStore for ChromaVectorStore {
 
             let op = || async {
                 let resp = self.client
-                    .post(&format!("{}/api/v1/collections/{}/upsert", self.base_url, self.collection_name))
+                    .post(format!("{}/api/v1/collections/{}/upsert", self.base_url, self.collection_name))
                     .json(&payload)
                     .send()
                     .await
-                    .map_err(|e| backoff::Error::transient(std::io::Error::new(
-                        std::io::ErrorKind::Other,
-                        e.to_string(),
-                    )))?;
+                    .map_err(|e| backoff::Error::transient(io::Error::other(e.to_string())))?;
 
                 if !resp.status().is_success() {
-                    return Err(backoff::Error::transient(std::io::Error::new(
-                        std::io::ErrorKind::Other,
-                        format!("HTTP {}", resp.status()),
-                    )));
+                    return Err(backoff::Error::transient(io::Error::other(format!("HTTP {}", resp.status()))));
                 }
-                Ok(())
+                Ok::<(), backoff::Error<io::Error>>(())
             };
 
             match retry(ExponentialBackoff::default(), op).await {
@@ -165,7 +158,7 @@ let embedding = self.llm_pool.embed(query_text).await
         });
 
         let resp = self.client
-            .post(&format!("{}/api/v1/collections/{}/query", self.base_url, self.collection_name))
+            .post(format!("{}/api/v1/collections/{}/query", self.base_url, self.collection_name))
             .json(&payload)
             .send()
             .await
@@ -205,7 +198,7 @@ let embedding = self.llm_pool.embed(query_text).await
 
     async fn delete_index(&self) -> Result<(), VectorStoreError> {
         let resp = self.client
-            .delete(&format!("{}/api/v1/collections/{}", self.base_url, self.collection_name))
+            .delete(format!("{}/api/v1/collections/{}", self.base_url, self.collection_name))
             .send()
             .await
             .map_err(|e| VectorStoreError::Operation(e.to_string()))?;
@@ -218,7 +211,7 @@ let embedding = self.llm_pool.embed(query_text).await
     }
 
     async fn health_check(&self) -> Result<bool, VectorStoreError> {
-        let resp = self.client.get(&format!("{}/api/v1/heartbeat", self.base_url)).send().await
+        let resp = self.client.get(format!("{}/api/v1/heartbeat", self.base_url)).send().await
             .map_err(|e| VectorStoreError::Connection(e.to_string()))?;
         Ok(resp.status().is_success())
     }
@@ -233,7 +226,7 @@ let embedding = self.llm_pool.embed(query_text).await
         });
         
         let resp = self.client
-            .post(&format!("{}/api/v1/collections/{}/delete", self.base_url, self.collection_name))
+            .post(format!("{}/api/v1/collections/{}/delete", self.base_url, self.collection_name))
             .json(&payload)
             .send()
             .await

@@ -24,7 +24,7 @@ void AgentTraceWidget::addMessage(const QString &json)
 {
     QLabel *bubble = new QLabel(json);
     bubble->setWordWrap(true);
-    bubble->setStyleSheet("QLabel { background-color: #2a2a2a; color: #ffffff; padding: 8px; border-radius: 8px; margin: 4px; }");
+    bubble->setStyleSheet(QStringLiteral("QLabel { background-color: #2a2a2a; color: #ffffff; padding: 8px; border-radius: 8px; margin: 4px; }"));
     m_chatLayout->addWidget(bubble);
     m_scroll->verticalScrollBar()->setValue(m_scroll->verticalScrollBar()->maximum());
 }

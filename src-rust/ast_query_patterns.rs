@@ -1,6 +1,6 @@
 // src-rust/ast_query_patterns.rs
 use std::collections::HashMap;
-use tracing::{instrument, info};
+use tracing::instrument;
 use uuid::Uuid;
 use thiserror::Error;
 
@@ -27,6 +27,12 @@ struct LanguagePatterns {
     chunk_query: String,      // For semantic chunking (top-level declarations)
     search_query: String,     // For structural search (functions, structs, calls, etc.)
     capture_names: Vec<&'static str>,
+}
+
+impl Default for AstQueryPatterns {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl AstQueryPatterns {

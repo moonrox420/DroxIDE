@@ -21,6 +21,12 @@ pub struct Metrics {
     pub avg_latency_ms: AtomicU64,
 }
 
+impl Default for Metrics {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Metrics {
     pub fn new() -> Self {
         Metrics {

@@ -2,7 +2,6 @@
 // Stub implementation when llama_cpp feature is disabled
 
 use serde::{Deserialize, Serialize};
-use std::sync::Arc;
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -42,6 +41,7 @@ pub struct EmbeddingResponse {
 
 #[derive(Debug)]
 pub struct LlamaPool {
+    #[allow(dead_code)]
     available: bool,
 }
 

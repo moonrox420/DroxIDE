@@ -1,6 +1,5 @@
 // src-rust/vector_store_trait.rs
 use async_trait::async_trait;
-use serde::{Deserialize, Serialize};
 use crate::rag::RagDocument;
 
 #[derive(Debug)]

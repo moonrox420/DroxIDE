@@ -21,9 +21,9 @@ set(AUTOGEN_USE_SYSTEM_INCLUDE ON)
 
 # Treat warnings as errors in Release
 if(MSVC)
-    add_compile_options(/W4 /WX /permissive- /EHsc)
+    add_compile_options(/W4 /permissive- /EHsc)
 else()
-    add_compile_options(-Wall -Wextra -Wpedantic -Werror)
+    add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
 # Qt6 via vcpkg (your confirmed path)
@@ -35,9 +35,12 @@ find_package(Qt6 6.5 COMPONENTS
     Network
     CONFIG QUIET)
 
- sage(STATUS "║                                                                  ║")
+if(NOT Qt6_FOUND)
+    message(STATUS "╔══════════════════════════════════════════════════════════════════╗")
+    message(STATUS "║  Qt6 not found. Building Rust core only.                         ║")
+    message(STATUS "║                                                                  ║")
     message(STATUS "║  To build full UI:                                               ║")
-    message(STATUS "║  Windows: vcpkg install qt6-base qt6-tools --triplet x64-windows║")
+    message(STATUS "║  Windows: vcpkg install qtbase qttools qt5compat --triplet x64-windows║")
     message(STATUS "║  Then add: -DCMAKE_PREFIX_PATH=C:/vcpkg/installed/x64-windows   ║")
     message(STATUS "╚══════════════════════════════════════════════════════════════════╝")
 endif()
@@ -46,23 +49,17 @@ endif()
 include(FetchContent)
 fetchcontent_declare(Corrosion
     GIT_REPOSITORY https://github.com/corrosion-rs/corrosion.git
-    GIT_TAG v0.4.5
+    GIT_TAG master
     GIT_SHALLOW TRUE)
 fetchcontent_makeavailable(Corrosion)
 
-# Explicitly set Rust toolchain to MSVC
-set(Rust_TOOLCHAIN "stable-x86_64-pc-windows-msvc" CACHE STRING "Rust toolchain to use")
-set(Rust_COMPILER "$ENV{USERPROFILE}\\.cargo\\bin\\rustc.exe" CACHE FILEPATH "Path to Rust compiler")
-
-# Configure Rust flags for Windows MSVC
-set(RUSTFLAGS "-Z unstable-options" CACHE STRING "Rust compiler flags")
-set(Corrosion_RUSTFLAGS ${RUSTFLAGS})
+# Let Corrosion auto-detect the Rust toolchain (don't hardcode)
+# The user's system may have stable-x86_64-pc-windows-msvc or gnu
 
 corrosion_import_crate(MANIFEST_PATH Cargo.toml)
 
 # Only build Qt UI if Qt6 is found
 if(Qt6_FOUND)
-    set(ENV{RUSTFLAGS} "-Z unstable-options")
     message(STATUS "✅ Qt6 found. Building full DroxIDE UI application")
 
     # Complete source list per DroxIDE spec

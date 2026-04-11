@@ -1,4 +1,9 @@
 // src/editor/editor.cpp
+#include <QVBoxLayout>
+#include <QFile>
+#include <QTextStream>
+#include <QFileInfo>
+#include <QCloseEvent>
 #include "editor.h"
 #include "syntaxhighlighter.h"
 

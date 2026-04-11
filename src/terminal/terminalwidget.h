@@ -1,13 +1,8 @@
-// src/terminal/terminalwidget.h
+﻿// src/terminal/terminalwidget.h
 #pragma once
 
-#include <QWidget>
-#include <QPlainTextEdit>
-#include <QProcess>
-#include <QTextCursor>
-#include <QTimer>
-#include <QVBoxLayout>
-#include <QKeyEvent>
+#include <QtWidgets>
+#include <QtCore>
 
 class TerminalWidget : public QWidget
 {
@@ -27,7 +22,7 @@ signals:
     void outputReceived(const QString &text);
     void shellExited(int exitCode);
 
-public slots:
+public Q_SLOTS:
     void onProcessReadyReadStandardOutput();
     void onProcessReadyReadStandardError();
     void onProcessFinished(int exitCode, QProcess::ExitStatus exitStatus);

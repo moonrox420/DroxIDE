@@ -1,4 +1,4 @@
-// src/dialogs/commitdialog.h
+﻿// src/dialogs/commitdialog.h
 #ifndef COMMITDIALOG_H
 #define COMMITDIALOG_H
 
@@ -17,7 +17,7 @@ public:
     
     QString getCommitMessage() const;
 
-private slots:
+private Q_SLOTS:
     void onCommitClicked();
 
 private:

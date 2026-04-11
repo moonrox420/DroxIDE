@@ -11,7 +11,7 @@ use std::sync::Arc;
 use tokio::sync::mpsc;
 use uuid::Uuid;
 use chrono::Utc;
-use tracing::{instrument, info};
+use tracing::instrument;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub enum OrchestratorState {
@@ -39,12 +39,15 @@ pub struct Orchestrator {
     architect: ArchitectAgent,
     coder: CoderAgent,
     reviewer: ReviewerAgent,
+    #[allow(dead_code)]
     tester: TesterAgent,
+    #[allow(dead_code)]
     janitor: JanitorAgent,
     rag: RagPipeline,
     sandbox: Sandbox,
     llama: Arc<LlamaPool>,
     metrics: Arc<Metrics>,
+    #[allow(dead_code)]
     audit: AuditLog,
     current_trace_id: String,
     pending_diff: Option<String>,
@@ -142,7 +145,7 @@ let current_dir = std::env::current_dir().unwrap().to_string_lossy().to_string()
         let _ = self.event_tx.send(msg).await;
     }
 
-    pub fn accept_diff(&mut self, diff_id: &str) -> Result<(), String> {
+    pub fn accept_diff(&mut self, _diff_id: &str) -> Result<(), String> {
         // diff_id is intentionally unused
         self.state = OrchestratorState::Applying;
         self.pending_diff = None;
@@ -151,7 +154,7 @@ let current_dir = std::env::current_dir().unwrap().to_string_lossy().to_string()
         Ok(())
     }
 
-    pub fn reject_diff(&mut self, diff_id: &str, feedback: &str) -> Result<(), String> {
+    pub fn reject_diff(&mut self, _diff_id: &str, _feedback: &str) -> Result<(), String> {
         // diff_id and feedback are intentionally unused
         self.metrics.increment_rejected();
         self.state = OrchestratorState::Idle;

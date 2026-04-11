@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 use std::path::Path;
 use std::time::Duration;
 use tokio::time::timeout;
-use tracing::{instrument, info, warn, error};
+use tracing::{instrument, info, error};
 use uuid::Uuid;
 use thiserror::Error;
 use futures_util::StreamExt;
@@ -106,12 +106,12 @@ impl Sandbox {
         // Create a tar archive with the Dockerfile
         let mut ar = tar::Builder::new(Vec::new());
         let mut header = tar::Header::new_gnu();
-        header.set_path("Dockerfile").map_err(|e| SandboxError::Io(e))?;
+        header.set_path("Dockerfile").map_err(SandboxError::Io)?;
         header.set_size(dockerfile_content.len() as u64);
         header.set_mode(0o644);
         header.set_cksum();
-        ar.append(&header, dockerfile_content.as_bytes()).map_err(|e| SandboxError::Io(e))?;
-        let archive = ar.into_inner().map_err(|e| SandboxError::Io(e))?;
+        ar.append(&header, dockerfile_content.as_bytes()).map_err(SandboxError::Io)?;
+        let archive = ar.into_inner().map_err(SandboxError::Io)?;
 
         let mut build_stream = self.docker.build_image(
             build_options,
@@ -128,7 +128,7 @@ impl Sandbox {
                     }
                     if let Some(aux) = msg.aux {
                         if let Some(id) = aux.id {
-                            image_id = id;
+                            image_id = id.clone();
                         }
                     }
                 }
@@ -243,7 +243,7 @@ impl Sandbox {
             })
         }).await.map_err(|_| SandboxError::Timeout(timeout_secs))?;
 
-        Ok(result)
+        result
     }
 
     #[instrument(name = "sandbox_shadow_sim", skip(self), fields(trace_id = %Uuid::new_v4()))]

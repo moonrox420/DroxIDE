@@ -1,5 +1,5 @@
 // src-rust/git.rs
-use git2::{Repository, Commit, Signature};
+use git2::{Repository, Signature};
 use std::path::Path;
 use tracing::{instrument, info};
 use uuid::Uuid;

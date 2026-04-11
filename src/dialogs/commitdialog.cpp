@@ -8,34 +8,34 @@
 CommitDialog::CommitDialog(QWidget *parent, GitManager *gitManager)
     : QDialog(parent), mGitManager(gitManager)
 {
-    setWindowTitle("Git Commit");
+    setWindowTitle(QStringLiteral("Git Commit"));
     setMinimumWidth(500);
     setMinimumHeight(400);
-    
+
     QVBoxLayout *layout = new QVBoxLayout(this);
-    
-    layout->addWidget(new QLabel("Files to commit:"));
-    
+
+    layout->addWidget(new QLabel(QStringLiteral("Files to commit:")));
+
     mFilesList = new QListWidget();
     // TODO: Load files from git status
-    mFilesList->addItem("main.rs");
-    mFilesList->addItem("Cargo.toml");
+    mFilesList->addItem(QStringLiteral("main.rs"));
+    mFilesList->addItem(QStringLiteral("Cargo.toml"));
     layout->addWidget(mFilesList);
-    
-    layout->addWidget(new QLabel("Commit Message:"));
-    
+
+    layout->addWidget(new QLabel(QStringLiteral("Commit Message:")));
+
     mMessageEdit = new QTextEdit();
-    mMessageEdit->setPlaceholderText("Describe your changes...");
+    mMessageEdit->setPlaceholderText(QStringLiteral("Describe your changes..."));
     layout->addWidget(mMessageEdit);
-    
+
     QHBoxLayout *btnLayout = new QHBoxLayout();
-    QPushButton *cancelBtn = new QPushButton("Cancel");
-    mCommitBtn = new QPushButton("Commit");
+    QPushButton *cancelBtn = new QPushButton(QStringLiteral("Cancel"));
+    mCommitBtn = new QPushButton(QStringLiteral("Commit"));
     btnLayout->addStretch();
     btnLayout->addWidget(cancelBtn);
     btnLayout->addWidget(mCommitBtn);
     layout->addLayout(btnLayout);
-    
+
     connect(cancelBtn, &QPushButton::clicked, this, &QDialog::reject);
     connect(mCommitBtn, &QPushButton::clicked, this, &CommitDialog::onCommitClicked);
 }

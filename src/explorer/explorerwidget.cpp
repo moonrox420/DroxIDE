@@ -1,9 +1,10 @@
 // src/explorer/explorerwidget.cpp
-#include "explorerwidget.h"
 #include <QVBoxLayout>
 #include <QDir>
 #include <QFileInfo>
 #include <QStandardPaths>
+#include <QStyle>
+#include "explorerwidget.h"
 
 ExplorerWidget::ExplorerWidget(QWidget *parent)
     : QWidget(parent)

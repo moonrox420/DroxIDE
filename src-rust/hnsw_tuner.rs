@@ -50,6 +50,12 @@ pub struct HnswTuner {
     last_profile: Arc<ParkingLotMutex<Option<CorpusProfile>>>,
 }
 
+impl Default for HnswTuner {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl HnswTuner {
     pub fn new() -> Self {
         HnswTuner {
@@ -110,7 +116,7 @@ impl HnswTuner {
             workload,
         };
 
-        self.last_profile.lock().put(Some(profile.clone()));
+        *self.last_profile.lock() = Some(profile.clone());
         Ok(profile)
     }
 

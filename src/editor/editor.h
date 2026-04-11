@@ -1,20 +1,10 @@
-// src/editor/editor.h
+﻿// src/editor/editor.h
 #pragma once
 
-#include <QWidget>
-#include <QPlainTextEdit>
-#include <QSyntaxHighlighter>
-#include <QTextDocument>
-#include <QTextCursor>
-#include <QFont>
-#include <QPalette>
-#include <QMenu>
-#include <QAction>
-#include <QFile>
-#include <QTextStream>
-#include <QTimer>
-#include <QVBoxLayout>
-#include <QFileInfo>
+#include <QtWidgets>
+#include <QtCore>
+
+class SyntaxHighlighter;
 
 class Editor : public QWidget
 {
@@ -37,7 +27,7 @@ signals:
     void fileChanged(const QString &path);
     void modificationChanged(bool modified);
 
-public slots:
+public Q_SLOTS:
     void undo();
     void redo();
     void cut();

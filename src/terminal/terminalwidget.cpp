@@ -1,6 +1,7 @@
 // src/terminal/terminalwidget.cpp
-#include "terminalwidget.h"
 #include <QDir>
+#include <QProcess>
+#include "terminalwidget.h"
 
 TerminalWidget::TerminalWidget(QWidget *parent)
     : QWidget(parent)

@@ -5,13 +5,13 @@
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
-    
-    app.setApplicationName("DroxIDE");
-    app.setApplicationVersion("1.0.0");
-    app.setApplicationDisplayName("DroxIDE - Native Desktop AI IDE");
-    
+
+    app.setApplicationName(QStringLiteral("DroxIDE"));
+    app.setApplicationVersion(QStringLiteral("1.0.0"));
+    app.setApplicationDisplayName(QStringLiteral("DroxIDE - Native Desktop AI IDE"));
+
     MainWindow window;
     window.show();
-    
+
     return app.exec();
 }

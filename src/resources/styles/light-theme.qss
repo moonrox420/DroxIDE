@@ -1,0 +1,130 @@
+/* Light Theme Stylesheet for DroxIDE */
+/* Placeholder - extend as needed */
+
+QWidget {
+    background-color: #F5F5F5;
+    color: #212121;
+    font-family: "Consolas", "Courier New", monospace;
+    font-size: 11pt;
+}
+
+QMainWindow {
+    background-color: #FFFFFF;
+}
+
+QMenuBar {
+    background-color: #FAFAFA;
+    border-bottom: 1px solid #E0E0E0;
+    padding: 2px;
+}
+
+QMenuBar::item {
+    padding: 5px 10px;
+    background-color: transparent;
+}
+
+QMenuBar::item:selected {
+    background-color: #E3F2FD;
+}
+
+QMenu {
+    background-color: #FFFFFF;
+    border: 1px solid #E0E0E0;
+}
+
+QMenu::item {
+    padding: 5px 30px 5px 20px;
+}
+
+QMenu::item:selected {
+    background-color: #E3F2FD;
+}
+
+QToolBar {
+    background-color: #FAFAFA;
+    border-bottom: 1px solid #E0E0E0;
+    spacing: 5px;
+    padding: 3px;
+}
+
+QStatusBar {
+    background-color: #FAFAFA;
+    border-top: 1px solid #E0E0E0;
+    color: #757575;
+}
+
+QPlainTextEdit {
+    background-color: #FFFFFF;
+    border: 1px solid #E0E0E0;
+    selection-background-color: #BBDEFB;
+}
+
+QTreeWidget {
+    background-color: #FFFFFF;
+    border: 1px solid #E0E0E0;
+    outline: none;
+}
+
+QTreeWidget::item:selected {
+    background-color: #E3F2FD;
+    color: #212121;
+}
+
+QTabWidget::pane {
+    border: 1px solid #E0E0E0;
+}
+
+QTabBar::tab {
+    background-color: #FAFAFA;
+    border: 1px solid #E0E0E0;
+    padding: 5px 10px;
+}
+
+QTabBar::tab:selected {
+    background-color: #FFFFFF;
+    border-bottom-color: #FFFFFF;
+}
+
+QPushButton {
+    background-color: #E3F2FD;
+    border: 1px solid #90CAF9;
+    padding: 5px 15px;
+    border-radius: 3px;
+}
+
+QPushButton:hover {
+    background-color: #BBDEFB;
+}
+
+QPushButton:pressed {
+    background-color: #90CAF9;
+}
+
+QLabel {
+    color: #212121;
+}
+
+QLineEdit, QTextEdit {
+    background-color: #FFFFFF;
+    border: 1px solid #E0E0E0;
+    padding: 3px;
+}
+
+QLineEdit:focus, QTextEdit:focus {
+    border: 1px solid #90CAF9;
+}
+
+QScrollBar:vertical {
+    background-color: #F5F5F5;
+    width: 12px;
+}
+
+QScrollBar::handle:vertical {
+    background-color: #BDBDBD;
+    border-radius: 6px;
+    min-height: 20px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background-color: #9E9E9E;
+}

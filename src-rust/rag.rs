@@ -1,9 +1,9 @@
 // src-rust/rag.rs
 use serde::{Deserialize, Serialize};
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use walkdir::WalkDir;
 use tree_sitter::{Parser, Language, Query, QueryCursor};
-use tracing::{instrument, info, error};
+use tracing::{instrument, info};
 use uuid::Uuid;
 use chrono::Utc;
 use std::sync::Arc;
@@ -19,23 +19,22 @@ pub enum RagError {
     Parse(String),
     #[error("Unsupported language: {0}")]
     UnsupportedLanguage(String),
-    #[error("Embedding failed: {0}")]
-    Embedding(#[from] crate::llama::LlamaError),
     #[error("Semantic embedding failed: {0}")]
-    Embedding(#[from] crate::semantic_embedding::EmbeddingError),
+    SemanticEmbedding(#[from] crate::semantic_embedding::EmbeddingError),
     #[error("IO error: {0}")]
     Io(#[from] std::io::Error),
     #[error("Query pattern error: {0}")]
     Query(#[from] crate::ast_query_patterns::QueryError),
     #[error("Query compilation error: {0}")]
     QueryCompilation(String),
+    #[error("LLM error: {0}")]
+    Llm(#[from] crate::llama::LlamaError),
 }
 
 impl From<tree_sitter::QueryError> for RagError {
     fn from(e: tree_sitter::QueryError) -> Self {
-        RagError::QueryCompilation(format!("Query compilation failed: {:?}", e))
+        RagError::QueryCompilation(format!("Query compilation failed: {}", e))
     }
-}
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -189,7 +188,7 @@ impl OptimizedChunker {
 
         let mut chunks = Vec::new();
         let chunk_size_target = 50;
-        let overlap = 10;
+        let _overlap = 10;
 
         for m in matches {
             for capture in m.captures {
